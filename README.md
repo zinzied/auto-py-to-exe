@@ -1,5 +1,6 @@
 <h1 align="center">Auto PY to EXE</h1>
 <p align="center">A .py to .exe converter using a simple graphical interface and <a href="https://pyinstaller.readthedocs.io/en/stable/index.html">PyInstaller</a> in Python.</p>
+<p align="center"><em>Now with Pro Features: Build optimization, code obfuscation, and antivirus whitelist generation!</em></p>
 
 <p align="center">
     <img src="https://nitratine.net/posts/auto-py-to-exe/feature.png" alt="Empty interface">
@@ -95,6 +96,56 @@ You can run this project locally by following these steps:
 
 _Easy._
 
+## 🚀 Pro Features
+
+Auto-py-to-exe now includes advanced pro features to enhance your build process with optimization and security capabilities.
+
+### Available Pro Features
+
+#### ⚡ Build Optimization
+- **Build Caching**: Cache successful builds for faster consecutive builds with the same configuration
+- **Auto-detect Hidden Imports**: Automatically scan your script to detect hidden imports that PyInstaller might miss
+
+#### 🔒 Security Features
+- **Code Obfuscation**: Obfuscate your Python source code before packaging to protect intellectual property
+- **Antivirus Whitelist Generation**: Generate whitelist information to help with antivirus false positives
+
+### Installing Pro Features
+
+To enable pro features, run the installation script:
+
+```bash
+python install_pro_features.py
+```
+
+This will install the required dependencies:
+- **PyArmor** - For code obfuscation
+- **Python-minifier** - Alternative obfuscation tool
+- **Additional optimization tools**
+
+### Using Pro Features
+
+1. **Access the Pro Features section** in the interface (appears alongside Advanced and Settings)
+2. **Enable desired features** using the toggle switches
+3. **Configure options** as needed (obfuscation level, caching settings, etc.)
+4. **Build your executable** normally - pro features will be applied automatically
+
+### Antivirus False Positives
+
+If your executable is flagged by antivirus software, use the **Antivirus Whitelist Generation** feature:
+
+1. Enable the feature before building
+2. After building, you'll receive a `*_whitelist_info.json` file
+3. Use the provided information to whitelist your executable with antivirus vendors
+4. Submit false positive reports to antivirus companies using the generated data
+
+### Pro Features Status
+
+Check the **Pro Status** section to see:
+- Which features are available and enabled
+- Installation status of dependencies
+- Instructions for enabling additional functionality
+
 ### Arguments
 
 Use the help flag to get the usage: `auto-py-to-exe --help`
@@ -114,6 +165,33 @@ Use the help flag to get the usage: `auto-py-to-exe --help`
 Instead of inserting the same data into the UI over and over again, you can export the current state by going to the "Configuration" section within the settings tab and exporting the config to a JSON file. This can then be imported into the UI again to re-populate all fields.
 
 This JSON config export action does not save the output directory automatically as moving hosts could mean different directory structures. If you want to have the output directory in the JSON config, add the directory under `nonPyinstallerOptions.outputDirectory` in the JSON file (will need to create a new key).
+
+**Pro Features Configuration**: Pro features settings (build caching, obfuscation, hidden imports detection, antivirus whitelist) are automatically included in exported configurations and will be restored when importing.
+
+## Troubleshooting
+
+### Pro Features Issues
+
+If you encounter issues with pro features:
+
+1. **Check installation**: Run `python install_pro_features.py` to verify dependencies
+2. **Verify status**: Check the Pro Status section in the interface
+3. **Review logs**: Check the console output for error messages
+4. **Disable problematic features**: Turn off specific features if they cause issues
+
+### Common Pro Features Problems
+
+- **Obfuscation fails**: Ensure PyArmor is properly installed and your script is compatible
+- **Build caching not working**: Check write permissions in the cache directory
+- **Hidden imports not detected**: Manually add missing imports in the Additional Files section
+- **Antivirus still flagging**: Submit the generated whitelist information to antivirus vendors
+
+### Performance Optimization
+
+- **Enable build caching** for faster consecutive builds
+- **Use hidden imports detection** to avoid manual dependency hunting
+- **Consider code obfuscation** only for production builds (adds build time)
+- **Generate antivirus whitelist** for distribution to end users
 
 ## Examples
 
@@ -135,6 +213,22 @@ Check out [CONTRIBUTING.md](./CONTRIBUTING.md) to see guidelines on how to contr
 ## Issues Using the Tool
 
 If you're having issues with the packaged executable or using this tool in general, I recommend you read [my blog post on common issues when using auto-py-to-exe](https://nitratine.net/blog/post/issues-when-using-auto-py-to-exe/?utm_source=auto_py_to_exe&utm_medium=readme_link&utm_campaign=auto_py_to_exe_help). This post covers things you should know about packaging Python scripts and fixes for things that commonly go wrong.
+
+### Antivirus False Positives
+
+If your executable is being flagged as malware by antivirus software:
+
+1. **Use the Antivirus Whitelist Generation feature** in Pro Features
+2. **Submit false positive reports** to antivirus vendors using the generated information
+3. **Consider code signing** your executable for production releases
+4. **Add exclusions** to your antivirus software for the build directory
+
+### Pro Features Troubleshooting
+
+For issues specific to pro features:
+- Check the **Pro Status** section for dependency installation status
+- Review the **Troubleshooting** section above for common solutions
+- Disable problematic features temporarily to isolate issues
 
 If you believe you've found an issue with this tool, please follow the ["Reporting an Issue" section in CONTRIBUTING.md](./CONTRIBUTING.md#reporting-an-issue).
 
