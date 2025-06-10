@@ -31,12 +31,6 @@ Türkçe Talimatları [burada](./README-Turkish.md) bulabilirsiniz.
 
 Беларускамоўны README [тут](README-Belarusian.md)
 
-## Demo
-
-<p align="center">
-    ![ezgif-8c424506077746](https://github.com/user-attachments/assets/a4286f6b-5218-4af2-b600-23bbbcc9e274)
-
-</p>
 
 ## Getting Started
 
