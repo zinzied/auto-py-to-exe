@@ -3,7 +3,8 @@
 <p align="center"><em>Now with Pro Features: Build optimization, code obfuscation, and antivirus whitelist generation!</em></p>
 
 <p align="center">
-    <img src="https://nitratine.net/posts/auto-py-to-exe/feature.png" alt="Empty interface">
+    <img width="474" alt="image" src="https://github.com/user-attachments/assets/affbcab7-f842-4ed1-94e2-0ee8561ae506" />
+
 </p>
 
 <p align="center">
@@ -31,11 +32,6 @@ Türkçe Talimatları [burada](./README-Turkish.md) bulabilirsiniz.
 
 Беларускамоўны README [тут](README-Belarusian.md)
 
-## Demo
-
-<p align="center">
-    <img src="https://nitratine.net/posts/auto-py-to-exe/auto-py-to-exe-demo.gif" alt="auto-py-to-exe Demo">
-</p>
 
 ## Getting Started
 
