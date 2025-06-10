@@ -1,10 +1,12 @@
-<h1 align="center">Auto PY to EXE</h1>
+![okkkc4455e](https://github.com/user-attachments/assets/d76fe40c-13a3-454c-8562-2d2353cd341a)<h1 align="center">Auto PY to EXE</h1>
 <p align="center">A .py to .exe converter using a simple graphical interface and <a href="https://pyinstaller.readthedocs.io/en/stable/index.html">PyInstaller</a> in Python.</p>
 <p align="center"><em>Now with Pro Features: Build optimization, code obfuscation, and antivirus whitelist generation!</em></p>
 
 <p align="center">
     <img width="474" alt="image" src="https://github.com/user-attachments/assets/affbcab7-f842-4ed1-94e2-0ee8561ae506" />
-
+</p>
+<p align="center">
+    <img width="474" alt="image" src="https://github.com/user-attachments/assets/80144224-8270-485c-9643-2028d59dabec.gif" />
 </p>
 
 <p align="center">
