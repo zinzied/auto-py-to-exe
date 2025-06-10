@@ -34,7 +34,8 @@ Türkçe Talimatları [burada](./README-Turkish.md) bulabilirsiniz.
 ## Demo
 
 <p align="center">
-    <img src="https://nitratine.net/posts/auto-py-to-exe/auto-py-to-exe-demo.gif" alt="auto-py-to-exe Demo">
+    ![ezgif-8c424506077746](https://github.com/user-attachments/assets/a4286f6b-5218-4af2-b600-23bbbcc9e274)
+
 </p>
 
 ## Getting Started
