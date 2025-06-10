@@ -8,7 +8,35 @@ from eel import chrome, edge
 
 from . import config, dialogs, packaging, utils
 
+# Import pro features
+try:
+    from .pro_features import build_cache, hidden_imports_detector
+    from .security_features import code_obfuscator, antivirus_whitelist_generator
+    PRO_FEATURES_AVAILABLE = True
+    print("Pro features loaded successfully")
+except ImportError as e:
+    print(f"Pro features not available: {e}")
+    PRO_FEATURES_AVAILABLE = False
+
+    # Dummy classes to prevent errors
+    class DummyBuildCache:
+        def get_cache_stats(self): return {}
+        def clear_cache(self): pass
+
+    class DummyCodeObfuscator:
+        def is_obfuscation_available(self): return False, "Pro features not installed"
+
+    class DummyHiddenImportsDetector:
+        def detect_hidden_imports(self, script_path): return []
+
+    # Create dummy instances
+    build_cache = DummyBuildCache()
+    code_obfuscator = DummyCodeObfuscator()
+    hidden_imports_detector = DummyHiddenImportsDetector()
+
 LOGGING_HANDLER_NAME = "auto-py-to-exe logging handler"
+
+logger = logging.getLogger(__name__)
 
 
 # Setup eels root folder
@@ -65,7 +93,7 @@ def initialise():
     __setup_logging_ui_forwarding()
 
     # Pass initial values to the client
-    return {
+    init_data = {
         "filename": config.package_filename,
         "suppliedUiConfiguration": config.supplied_ui_configuration,
         "options": __get_pyinstaller_options(),
@@ -74,6 +102,14 @@ def initialise():
         "defaultOutputFolder": config.default_output_directory,
         "languageHint": config.language_hint,
     }
+
+    # Add pro features status
+    if PRO_FEATURES_AVAILABLE:
+        init_data["proFeatures"] = get_pro_features_status()
+    else:
+        init_data["proFeatures"] = {"available": False}
+
+    return init_data
 
 
 @eel.expose
@@ -174,6 +210,131 @@ def package(command, non_pyinstaller_options):
 
     send_message_to_ui_output("Complete.\n")
     eel.signalPackagingComplete(packaging_successful)()
+
+
+# Pro Features API Endpoints
+
+@eel.expose
+def get_pro_features_status():
+    """Get the status of pro features"""
+    if not PRO_FEATURES_AVAILABLE:
+        return {
+            'available': False,
+            'message': 'Pro features not available'
+        }
+
+    return {
+        'available': True,
+        'enabled': config.PRO_FEATURES_ENABLED,
+        'features': {
+            'build_cache': config.PRO_FEATURES_ENABLED,
+            'obfuscation': config.OBFUSCATION_ENABLED,
+            'hidden_imports_detection': config.HIDDEN_IMPORTS_AUTO_DETECT,
+            'antivirus_whitelist': config.ANTIVIRUS_WHITELIST_GENERATION
+        },
+        'obfuscation_tool': config.OBFUSCATION_TOOL,
+        'obfuscation_level': config.OBFUSCATION_LEVEL
+    }
+
+
+@eel.expose
+def get_build_cache_stats():
+    """Get build cache statistics"""
+    if not PRO_FEATURES_AVAILABLE:
+        return {}
+
+    try:
+        return build_cache.get_cache_stats()
+    except Exception as e:
+        logger.error(f"Failed to get cache stats: {e}")
+        return {}
+
+
+@eel.expose
+def clear_build_cache():
+    """Clear the build cache"""
+    if not PRO_FEATURES_AVAILABLE:
+        return False
+
+    try:
+        build_cache.clear_cache()
+        send_message_to_ui_output("Build cache cleared successfully.\n")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to clear cache: {e}")
+        send_message_to_ui_output(f"Failed to clear cache: {e}\n")
+        return False
+
+
+@eel.expose
+def check_obfuscation_availability():
+    """Check if code obfuscation is available"""
+    if not PRO_FEATURES_AVAILABLE:
+        return {'available': False, 'message': 'Pro features not available'}
+
+    try:
+        available, message = code_obfuscator.is_obfuscation_available()
+        return {'available': available, 'message': message}
+    except Exception as e:
+        logger.error(f"Failed to check obfuscation: {e}")
+        return {'available': False, 'message': f'Error: {e}'}
+
+
+@eel.expose
+def detect_hidden_imports(script_path):
+    """Detect hidden imports for a script"""
+    if not PRO_FEATURES_AVAILABLE or not script_path:
+        return []
+
+    try:
+        imports = hidden_imports_detector.detect_hidden_imports(script_path)
+        send_message_to_ui_output(f"Detected {len(imports)} hidden imports.\n")
+        return imports
+    except Exception as e:
+        logger.error(f"Failed to detect hidden imports: {e}")
+        send_message_to_ui_output(f"Failed to detect hidden imports: {e}\n")
+        return []
+
+
+@eel.expose
+def update_pro_feature_setting(feature, enabled):
+    """Update a pro feature setting"""
+    if not PRO_FEATURES_AVAILABLE:
+        return False
+
+    try:
+        if feature == 'build_cache':
+            config.PRO_FEATURES_ENABLED = enabled
+        elif feature == 'obfuscation':
+            config.OBFUSCATION_ENABLED = enabled
+        elif feature == 'hidden_imports_detection':
+            config.HIDDEN_IMPORTS_AUTO_DETECT = enabled
+        elif feature == 'antivirus_whitelist':
+            config.ANTIVIRUS_WHITELIST_GENERATION = enabled
+        else:
+            return False
+
+        send_message_to_ui_output(f"Pro feature '{feature}' {'enabled' if enabled else 'disabled'}.\n")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to update setting: {e}")
+        return False
+
+
+@eel.expose
+def update_obfuscation_settings(tool, level):
+    """Update obfuscation settings"""
+    if not PRO_FEATURES_AVAILABLE:
+        return False
+
+    try:
+        config.OBFUSCATION_TOOL = tool
+        config.OBFUSCATION_LEVEL = level
+        send_message_to_ui_output(f"Obfuscation settings updated: {tool} ({level}).\n")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to update obfuscation settings: {e}")
+        return False
 
 
 def send_message_to_ui_output(message):

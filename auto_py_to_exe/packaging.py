@@ -14,6 +14,16 @@ from PyInstaller.__main__ import run as run_pyinstaller
 from . import __version__ as version
 from . import config
 
+# Import pro features
+try:
+    from .pro_features import build_cache, hidden_imports_detector
+    from .security_features import code_obfuscator, antivirus_whitelist_generator
+    PRO_FEATURES_AVAILABLE = True
+    print("Pro features available in packaging module")
+except ImportError as e:
+    PRO_FEATURES_AVAILABLE = False
+    print(f"Pro features not available in packaging: {e}")
+
 logger = logging.getLogger(__name__)
 
 
@@ -100,8 +110,56 @@ def package(pyinstaller_command, options):
     # Show current version
     logger.info("Running auto-py-to-exe v" + version)
 
+    # Extract script path from command for pro features
+    script_path = _extract_script_path(pyinstaller_command)
+
+    # Check for cached build first (Pro Feature)
+    if PRO_FEATURES_AVAILABLE and config.PRO_FEATURES_ENABLED:
+        cached_build = build_cache.get_cached_build(script_path, pyinstaller_command)
+        if cached_build:
+            logger.info("Using cached build - skipping PyInstaller execution")
+            output_directory = os.path.abspath(options["outputDirectory"])
+            try:
+                __move_package(cached_build, output_directory)
+                logger.info("Cached build moved to output directory successfully")
+                return True
+            except Exception as e:
+                logger.warning(f"Failed to use cached build: {e}")
+                # Continue with normal build process
+
     # Notify the user of the workspace and setup building to it
     logger.info("Building directory: {}".format(config.temporary_directory))
+
+    # Pro Feature: Code Obfuscation
+    original_script_path = script_path
+    if PRO_FEATURES_AVAILABLE and config.OBFUSCATION_ENABLED and script_path:
+        logger.info("Applying code obfuscation...")
+        obfuscation_success, obfuscated_path, obfuscation_msg = code_obfuscator.obfuscate_script(
+            script_path, config.temporary_directory
+        )
+
+        if obfuscation_success:
+            logger.info(obfuscation_msg)
+            # Update command to use obfuscated script
+            pyinstaller_command = pyinstaller_command.replace(script_path, obfuscated_path)
+            script_path = obfuscated_path
+        else:
+            logger.warning(f"Obfuscation failed: {obfuscation_msg}")
+
+    # Pro Feature: Auto-detect hidden imports
+    if PRO_FEATURES_AVAILABLE and config.HIDDEN_IMPORTS_AUTO_DETECT and script_path:
+        logger.info("Auto-detecting hidden imports...")
+        hidden_imports = hidden_imports_detector.detect_hidden_imports(original_script_path)
+
+        if hidden_imports:
+            # Add hidden imports to PyInstaller command
+            hidden_imports_args = []
+            for imp in hidden_imports:
+                hidden_imports_args.extend(["--hidden-import", imp])
+
+            # Insert hidden imports into the command
+            pyinstaller_command += " " + " ".join(hidden_imports_args)
+            logger.info(f"Added {len(hidden_imports)} hidden imports: {hidden_imports}")
 
     # Override arguments
     dist_path = os.path.join(config.temporary_directory, "application")
@@ -140,6 +198,15 @@ def package(pyinstaller_command, options):
         logger.info("Moving project to: {0}".format(output_directory))
         try:
             __move_package(dist_path, output_directory)
+
+            # Pro Feature: Cache successful build
+            if PRO_FEATURES_AVAILABLE and config.PRO_FEATURES_ENABLED:
+                build_cache.cache_build(original_script_path, pyinstaller_command, dist_path)
+
+            # Pro Feature: Generate antivirus whitelist
+            if PRO_FEATURES_AVAILABLE and config.ANTIVIRUS_WHITELIST_GENERATION:
+                _generate_antivirus_whitelist(output_directory)
+
         except:  # noqa: E722
             logger.error("Failed to move project")
             logger.exception(traceback.format_exc())
@@ -149,3 +216,29 @@ def package(pyinstaller_command, options):
 
     # Set complete
     return True
+
+
+def _extract_script_path(pyinstaller_command: str) -> Optional[str]:
+    """Extract the main script path from PyInstaller command"""
+    try:
+        args = shlex.split(pyinstaller_command)
+        # Find the script file (usually the last argument without --)
+        for i, arg in enumerate(args):
+            if not arg.startswith('-') and arg.endswith('.py'):
+                return arg
+        return None
+    except Exception:
+        return None
+
+
+def _generate_antivirus_whitelist(output_directory: str):
+    """Generate antivirus whitelist for all executables in output directory"""
+    try:
+        for root, _, files in os.walk(output_directory):
+            for file in files:
+                if file.endswith('.exe'):
+                    exe_path = os.path.join(root, file)
+                    logger.info(f"Generating antivirus whitelist for: {exe_path}")
+                    antivirus_whitelist_generator.generate_whitelist_info(exe_path)
+    except Exception as e:
+        logger.error(f"Failed to generate antivirus whitelist: {e}")

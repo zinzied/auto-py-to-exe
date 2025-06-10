@@ -77,6 +77,9 @@ window.addEventListener('load', async () => {
   // Setup advanced section (for dynamic content)
   constructAdvancedSection(options);
 
+  // Pro features initialization disabled to prevent hanging
+  // Will be initialized manually after page loads
+
   // Setup json config file is supplied
   if (initialisationData.suppliedUiConfiguration !== null) {
     importConfiguration(initialisationData.suppliedUiConfiguration);
@@ -105,5 +108,24 @@ window.addEventListener('load', async () => {
   window.eel._websocket.addEventListener('close', (e) => window.close());
 
   console.log('Application initialised');
-  document.getElementById('spinner-root').style.display = 'none';
+  hideSpinner();
 });
+
+// Force hide spinner after maximum 5 seconds, regardless of what happens
+setTimeout(() => {
+  hideSpinner();
+  console.log('Spinner force-hidden after timeout');
+}, 5000);
+
+// Function to safely hide the spinner
+function hideSpinner() {
+  try {
+    const spinner = document.getElementById('spinner-root');
+    if (spinner && spinner.style.display !== 'none') {
+      spinner.style.display = 'none';
+      console.log('Spinner hidden');
+    }
+  } catch (error) {
+    console.error('Error hiding spinner:', error);
+  }
+}

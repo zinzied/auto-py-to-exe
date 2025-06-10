@@ -15,6 +15,11 @@ const importConfiguration = (configuration) => {
     });
   }
 
+  // Load pro features configuration
+  if (window.proFeatures && configuration.proFeatures) {
+    window.proFeatures.loadFromConfiguration(configuration);
+  }
+
   // setup nonPyinstallerOptions
   if ('nonPyinstallerOptions' in configuration) {
     if ('increaseRecursionLimit' in configuration.nonPyinstallerOptions) {
@@ -33,11 +38,18 @@ const _collectDataToExport = async () => {
   const nonPyinstallerConfiguration = getNonPyinstallerConfiguration();
   delete nonPyinstallerConfiguration.outputDirectory; // This does not need to be saved in the config
 
-  return {
+  let config = {
     version: 'auto-py-to-exe-configuration_v1',
     pyinstallerOptions: await getCurrentConfiguration(true),
     nonPyinstallerOptions: nonPyinstallerConfiguration,
   };
+
+  // Add pro features configuration
+  if (window.proFeatures) {
+    config = window.proFeatures.addToConfiguration(config);
+  }
+
+  return config;
 };
 
 const onConfigurationImport = async () => {
